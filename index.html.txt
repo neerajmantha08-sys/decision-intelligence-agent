@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Powered Small Business Decision Intelligence Agent</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- html2pdf.js for direct PDF file downloading -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandBg: '#F6F4EE',        /* Main background */
+            brandCard: '#FFFFFF',      /* Card background */
+            brandText: '#1F2D44',      /* Primary text */
+            brandSecondary: '#667085', /* Secondary text */
+            brandGreen: '#287F68',     /* Primary Green accent */
+            brandGreenHover: '#1d604f',
+            brandLime: '#DDF46B',      /* Light lime accent */
+            brandBorder: '#E5E2D9',    /* Border color */
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    body {
+      background-color: #F6F4EE;
+      color: #1F2D44;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Print Fallback Rules */
+    @media print {
+      body {
+        background-color: #FFFFFF !important;
+        color: #1F2D44 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print, header, footer, #mobile-menu, .btn-no-print {
+        display: none !important;
+      }
+      main {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .print-card {
+        box-shadow: none !important;
+        border: 1px solid #E5E2D9 !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased bg-brandBg text-brandText">
+
+  <header class="bg-brandCard border-b border-brandBorder sticky top-0 z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <!-- Logo & Title -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+          <div class="w-10 h-10 rounded-xl bg-brandGreen text-white flex items-center justify-center font-bold shadow-sm shrink-0">
+            <i data-lucide="brain-circuit" class="w-6 h-6 text-brandLime"></i>
+          </div>
+          <div>
+            <h1 class="text-sm sm:text-base font-bold text-brandText leading-tight">AI-Powered Small Business</h1>
+            <p class="text-xs text-brandSecondary font-medium">Decision Intelligence Agent</p>
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="hidden md:flex space-x-1 lg:space-x-2">
+          <button onclick="switchTab('home')" id="nav-home" class="px-3.5 py-2 rounded-xl text-sm font-semibold text-brandGreen bg-brandGreen/10 transition-all">
+            <i data-lucide="home" class="w-4 h-4 inline mr-1.5"></i> Home
+          </button>
+          <button onclick="switchTab('input')" id="nav-input" class="px-3.5 py-2 rounded-xl text-sm font-semibold text-brandSecondary hover:text-brandText hover:bg-black/5 transition-all">
+            <i data-lucide="calculator" class="w-4 h-4 inline mr-1.5"></i> Business Input
+          </button>
+          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3.5 py-2 rounded-xl text-sm font-semibold text-brandSecondary hover:text-brandText hover:bg-black/5 transition-all">
+            <i data-lucide="layout-dashboard" class="w-4 h-4 inline mr-1.5"></i> Results Dashboard
+          </button>
+          <button onclick="switchTab('saved')" id="nav-saved" class="px-3.5 py-2 rounded-xl text-sm font-semibold text-brandSecondary hover:text-brandText hover:bg-black/5 transition-all relative">
+            <i data-lucide="bookmark" class="w-4 h-4 inline mr-1.5"></i> Saved Analyses
+            <span id="saved-badge" class="ml-1.5 px-2 py-0.5 text-xs bg-brandGreen text-white rounded-full hidden">0</span>
+          </button>
+          <button onclick="switchTab('about')" id="nav-about" class="px-3.5 py-2 rounded-xl text-sm font-semibold text-brandSecondary hover:text-brandText hover:bg-black/5 transition-all">
+            <i data-lucide="info" class="w-4 h-4 inline mr-1.5"></i> How It Works
+          </button>
+        </nav>
+
+        <!-- Mobile Drawer Toggle -->
+        <div class="md:hidden flex items-center">
+          <button onclick="toggleMobileMenu()" class="p-2 rounded-xl text-brandSecondary hover:bg-black/5">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden bg-brandCard border-b border-brandBorder px-4 pt-2 pb-4 space-y-2">
+      <button onclick="switchTab('home')" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-brandText hover:bg-black/5">
+        <i data-lucide="home" class="w-4 h-4 inline mr-2"></i> Home
+      </button>
+      <button onclick="switchTab('input')" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-brandText hover:bg-black/5">
+        <i data-lucide="calculator" class="w-4 h-4 inline mr-2"></i> Business Input
+      </button>
+      <button onclick="switchTab('dashboard')" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-brandText hover:bg-black/5">
+        <i data-lucide="layout-dashboard" class="w-4 h-4 inline mr-2"></i> Results Dashboard
+      </button>
+      <button onclick="switchTab('saved')" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-brandText hover:bg-black/5">
+        <i data-lucide="bookmark" class="w-4 h-4 inline mr-2"></i> Saved Analyses
+      </button>
+      <button onclick="switchTab('about')" class="w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-brandText hover:bg-black/5">
+        <i data-lucide="info" class="w-4 h-4 inline mr-2"></i> How It Works
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+    <!-- ==================== TAB 1: HOME ==================== -->
+    <section id="tab-home" class="tab-content space-y-10">
+      <!-- Hero Banner -->
+      <div class="bg-brandCard border border-brandBorder rounded-3xl p-8 md:p-12 shadow-sm relative overflow-hidden">
+        <div class="max-w-3xl space-y-6">
+          <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-brandLime text-brandText">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brandGreen"></i> Smart Decision Support System
+          </span>
+          
+          <h1 class="text-3xl md:text-5xl font-extrabold text-brandText tracking-tight leading-tight">
+            AI-Powered Small Business Decision Intelligence Agent
+          </h1>
+          
+          <p class="text-brandSecondary text-base md:text-lg leading-relaxed">
+            Turn everyday business data into clear insights and practical next steps. Analyze your business performance, identify important risks and opportunities, and receive AI-powered recommendations tailored specifically to your data.
+          </p>
+
+          <div class="flex flex-wrap gap-4 pt-2">
+            <button onclick="switchTab('input')" class="px-6 py-3.5 rounded-xl bg-brandGreen hover:bg-brandGreenHover text-white font-bold shadow-sm transition-all flex items-center gap-2">
+              Analyze My Business <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </button>
+            <button onclick="loadDemoDataAndAnalyze()" class="px-6 py-3.5 rounded-xl bg-brandLime hover:bg-lime-300 text-brandText font-bold shadow-sm transition-all flex items-center gap-2">
+              <i data-lucide="play-circle" class="w-5 h-5 text-brandGreen"></i> Try Demo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Feature Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-brandCard p-6 rounded-2xl border border-brandBorder shadow-sm space-y-3">
+          <div class="w-12 h-12 rounded-xl bg-brandGreen/10 text-brandGreen flex items-center justify-center">
+            <i data-lucide="trending-up" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-lg font-bold text-brandText">Business Insights</h3>
+          <p class="text-sm text-brandSecondary">Understand profit margins, operating efficiency, and product sales concentrations from simple financial numbers.</p>
+        </div>
+
+        <div class="bg-brandCard p-6 rounded-2xl border border-brandBorder shadow-sm space-y-3">
+          <div class="w-12 h-12 rounded-xl bg-brandGreen/10 text-brandGreen flex items-center justify-center">
+            <i data-lucide="alert-triangle" class="w-6 h-6 text-brandGreen"></i>
+          </div>
+          <h3 class="text-lg font-bold text-brandText">Risk Detection</h3>
+          <p class="text-sm text-brandSecondary">Automatically detect cash burn issues, high expense ratios, customer drop-offs, or inventory level warnings before they become critical.</p>
+        </div>
+
+        <div class="bg-brandCard p-6 rounded-2xl border border-brandBorder shadow-sm space-y-3">
+          <div class="w-12 h-12 rounded-xl bg-brandGreen/10 text-brandGreen flex items-center justify-center">
+            <i data-lucide="check-square" class="w-6 h-6 text-brandGreen"></i>
+          </div>
+          <h3 class="text-lg font-bold text-brandText">Actionable Recommendations</h3>
+          <p class="text-sm text-brandSecondary">Receive practical, data-backed next steps with clear explanations ("Why") to optimize business decision making.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: BUSINESS PROFILE / DATA INPUT ==================== -->
+    <section id="tab-input" class="tab-content hidden space-y-8">
+      <div class="max-w-4xl mx-auto bg-brandCard rounded-3xl border border-brandBorder p-6 md:p-10 shadow-sm space-y-8">
+        <div>
+          <h2 class="text-2xl font-bold text-brandText">Business Profile & Operational Data</h2>
+          <p class="text-sm text-brandSecondary">Enter basic metrics for your business or click "Use Demo Data" to load realistic sample store figures.</p>
+        </div>
+
+        <form id="business-form" onsubmit="handleFormSubmit(event)" class="space-y-8">
+          
+          <!-- Section 1 — Business Profile -->
+          <div class="space-y-4">
+            <h3 class="text-base font-bold text-brandGreen flex items-center gap-2 border-b border-brandBorder pb-2">
+              <i data-lucide="building" class="w-4 h-4"></i> Section 1 — Business Profile
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Business Name *</label>
+                <input type="text" id="input-name" required placeholder="GreenBasket Local Store" class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Business Type *</label>
+                <select id="input-type" required class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+                  <option value="Retail">Retail</option>
+                  <option value="Grocery">Grocery</option>
+                  <option value="Restaurant">Restaurant</option>
+                  <option value="Clothing">Clothing</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Service Business">Service Business</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Primary Business Goal *</label>
+                <select id="input-goal" required class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+                  <option value="Increase Sales">Increase Sales</option>
+                  <option value="Improve Profit">Improve Profit</option>
+                  <option value="Reduce Costs">Reduce Costs</option>
+                  <option value="Improve Inventory">Improve Inventory</option>
+                  <option value="Grow Customers">Grow Customers</option>
+                  <option value="Overall Growth">Overall Growth</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2 — Business Data -->
+          <div class="space-y-4">
+            <h3 class="text-base font-bold text-brandGreen flex items-center gap-2 border-b border-brandBorder pb-2">
+              <i data-lucide="bar-chart-2" class="w-4 h-4"></i> Section 2 — Monthly Business Data
+            </h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Monthly Revenue (₹ / $) *</label>
+                <input type="number" id="input-revenue" min="0" required placeholder="180000" class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Monthly Expenses (₹ / $) *</label>
+                <input type="number" id="input-expenses" min="0" required placeholder="125000" class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Total Active Customers *</label>
+                <input type="number" id="input-customers" min="0" required placeholder="620" class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Monthly Sales (Units) *</label>
+                <input type="number" id="input-sales" min="0" required placeholder="1150" class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Best-Selling Product Name *</label>
+                <input type="text" id="input-best-product" required placeholder="Organic Grocery Pack" class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Best Product Monthly Units *</label>
+                <input type="number" id="input-best-units" min="0" required placeholder="320" class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Current Inventory Level *</label>
+                <select id="input-inventory" required class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+                  <option value="Low">Low</option>
+                  <option value="Moderate" selected>Moderate</option>
+                  <option value="High">High</option>
+                  <option value="Excess / Overstocked">Excess / Overstocked</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Marketing Spend (₹ / $) *</label>
+                <input type="number" id="input-marketing" min="0" required placeholder="12000" class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+              </div>
+              
+              <div>
+                <label class="block text-xs font-bold text-brandText mb-1.5">Optional Gemini API Key (For Live AI)</label>
+                <input type="password" id="input-api-key" placeholder="AIzaSy... (Leave empty to use Decision Engine)" class="w-full px-4 py-2.5 rounded-xl border border-brandBorder focus:ring-2 focus:ring-brandGreen focus:outline-none bg-brandBg/40 text-brandText text-sm font-medium">
+              </div>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-brandBorder">
+            <button type="button" onclick="fillDemoDataOnly()" class="px-5 py-3 rounded-xl bg-brandLime text-brandText font-bold shadow-sm hover:bg-lime-300 transition-all flex items-center gap-2 text-sm">
+              <i data-lucide="sparkles" class="w-4 h-4 text-brandGreen"></i> Use Demo Data
+            </button>
+
+            <button type="submit" id="btn-submit" class="px-8 py-3.5 rounded-xl bg-brandGreen hover:bg-brandGreenHover text-white font-bold shadow-md transition-all flex items-center gap-2">
+              <i data-lucide="cpu" class="w-5 h-5 text-brandLime"></i> Generate Business Analysis
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2.5: AI AGENT PROCESSING MODAL ==================== -->
+    <section id="tab-loading" class="tab-content hidden max-w-2xl mx-auto my-12 text-center space-y-6">
+      <div class="bg-brandCard p-8 md:p-12 rounded-3xl border border-brandBorder shadow-sm space-y-6">
+        <div class="w-16 h-16 rounded-2xl bg-brandGreen/10 text-brandGreen flex items-center justify-center mx-auto animate-pulse">
+          <i data-lucide="bot" class="w-8 h-8 text-brandGreen"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-brandText">Small Business Decision Intelligence Agent</h2>
+          <p class="text-sm text-brandSecondary mt-1">Analyzing financial metrics, calculating margins & risk factors...</p>
+        </div>
+
+        <!-- Workflow Step Tracker -->
+        <div class="text-left space-y-3 pt-4 border-t border-brandBorder text-xs sm:text-sm">
+          <div id="step-1" class="flex items-center gap-3 text-brandGreen font-semibold">
+            <i data-lucide="check-circle-2" class="w-5 h-5"></i> 1. Business Information Received
+          </div>
+          <div id="step-2" class="flex items-center gap-3 text-brandSecondary">
+            <i data-lucide="circle" class="w-5 h-5"></i> 2. Calculating Business Health Indicators
+          </div>
+          <div id="step-3" class="flex items-center gap-3 text-brandSecondary">
+            <i data-lucide="circle" class="w-5 h-5"></i> 3. AI Agent Analyzing Performance
+          </div>
+          <div id="step-4" class="flex items-center gap-3 text-brandSecondary">
+            <i data-lucide="circle" class="w-5 h-5"></i> 4. Identifying Risks & Opportunities
+          </div>
+          <div id="step-5" class="flex items-center gap-3 text-brandSecondary">
+            <i data-lucide="circle" class="w-5 h-5"></i> 5. Formulating Actionable Recommendations
+          </div>
+          <div id="step-6" class="flex items-center gap-3 text-brandSecondary">
+            <i data-lucide="circle" class="w-5 h-5"></i> 6. Finalizing AI Decision Summary
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: RESULTS DASHBOARD ==================== -->
+    <section id="tab-dashboard" class="tab-content hidden space-y-8">
+      
+      <!-- Top Bar Actions (Hidden during PDF Generation) -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-brandCard p-6 rounded-2xl border border-brandBorder shadow-sm no-print">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="dash-business-type-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brandGreen/10 text-brandGreen">Retail</span>
+            <span id="dash-goal-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-black/5 text-brandSecondary">Goal: Overall Growth</span>
+          </div>
+          <h2 id="dash-business-name" class="text-2xl font-extrabold text-brandText mt-1">GreenBasket Local Store</h2>
+        </div>
+        
+        <!-- PROMINENT WORKING EXPORT PDF / PRINT BUTTON -->
+        <div class="flex flex-wrap gap-2">
+          <button id="btn-export-pdf" onclick="exportReportToPDF()" class="px-5 py-2.5 rounded-xl bg-brandGreen text-white font-bold shadow-sm hover:bg-brandGreenHover transition-colors flex items-center gap-2 text-sm cursor-pointer">
+            <i data-lucide="download-cloud" class="w-4 h-4 text-brandLime"></i> Export Report (PDF / Print)
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN AREA CAPTURED BY HTML2PDF -->
+      <div id="pdf-content-area" class="space-y-8 bg-brandBg p-1 sm:p-2 rounded-2xl">
+
+        <!-- Business Health Score & Headline Card -->
+        <div class="bg-brandCard p-6 md:p-8 rounded-3xl border border-brandBorder shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6 print-card">
+          <div class="space-y-2 max-w-xl">
+            <span class="text-xs font-bold uppercase tracking-wider text-brandSecondary">Business Health Index</span>
+            <div class="flex items-center gap-3">
+              <div id="dash-health-score" class="text-4xl md:text-5xl font-black text-brandText">78 / 100</div>
+              <span id="dash-health-status" class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">
+                Healthy
+              </span>
+            </div>
+            <p id="dash-health-summary" class="text-sm text-brandSecondary leading-relaxed">
+              Your revenue comfortably exceeds expenses with a robust profit margin. Attention is needed on inventory turn for best-sellers.
+            </p>
+          </div>
+
+          <!-- Quick Goal Summary Box -->
+          <div class="w-full md:w-auto min-w-[240px] bg-brandBg/60 p-4 rounded-2xl border border-brandBorder space-y-2">
+            <div class="text-xs font-bold text-brandText flex items-center gap-1.5">
+              <i data-lucide="target" class="w-4 h-4 text-brandGreen"></i> Primary Target Goal
+            </div>
+            <div id="dash-goal-text" class="text-sm font-semibold text-brandGreen">Improve Profit & Inventory</div>
+          </div>
+        </div>
+
+        <!-- Key Metrics 6-Card Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
+          <!-- Revenue -->
+          <div class="bg-brandCard p-4 rounded-2xl border border-brandBorder shadow-sm print-card">
+            <span class="text-xs font-semibold text-brandSecondary">Monthly Revenue</span>
+            <div id="dash-revenue" class="text-lg sm:text-xl font-extrabold text-brandText mt-1">₹1,80,000</div>
+          </div>
+
+          <!-- Expenses -->
+          <div class="bg-brandCard p-4 rounded-2xl border border-brandBorder shadow-sm print-card">
+            <span class="text-xs font-semibold text-brandSecondary">Monthly Expenses</span>
+            <div id="dash-expenses" class="text-lg sm:text-xl font-extrabold text-brandText mt-1">₹1,25,000</div>
+          </div>
+
+          <!-- Net Profit -->
+          <div class="bg-brandCard p-4 rounded-2xl border border-brandBorder shadow-sm print-card">
+            <span class="text-xs font-semibold text-brandSecondary">Net Profit</span>
+            <div id="dash-profit" class="text-lg sm:text-xl font-extrabold text-brandGreen mt-1">₹55,000</div>
+          </div>
+
+          <!-- Profit Margin -->
+          <div class="bg-brandCard p-4 rounded-2xl border border-brandBorder shadow-sm print-card">
+            <span class="text-xs font-semibold text-brandSecondary">Profit Margin</span>
+            <div id="dash-margin" class="text-lg sm:text-xl font-extrabold text-brandText mt-1">30.6%</div>
+          </div>
+
+          <!-- Active Customers -->
+          <div class="bg-brandCard p-4 rounded-2xl border border-brandBorder shadow-sm print-card">
+            <span class="text-xs font-semibold text-brandSecondary">Customers</span>
+            <div id="dash-customers" class="text-lg sm:text-xl font-extrabold text-brandText mt-1">620</div>
+          </div>
+
+          <!-- Inventory Status -->
+          <div class="bg-brandCard p-4 rounded-2xl border border-brandBorder shadow-sm print-card">
+            <span class="text-xs font-semibold text-brandSecondary">Inventory Level</span>
+            <div id="dash-inventory" class="text-lg sm:text-xl font-extrabold text-brandText mt-1">Moderate</div>
+          </div>
+        </div>
+
+        <!-- Visualization Chart Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Chart: Revenue vs Expenses -->
+          <div class="lg:col-span-2 bg-brandCard p-6 rounded-3xl border border-brandBorder shadow-sm space-y-4 print-card">
+            <div class="flex justify-between items-center">
+              <h3 class="text-base font-bold text-brandText flex items-center gap-2">
+                <i data-lucide="bar-chart-3" class="w-4 h-4 text-brandGreen"></i> Financial Breakdown (Revenue vs Expenses)
+              </h3>
+              <span class="text-xs font-semibold text-brandSecondary">Monthly Comparison</span>
+            </div>
+            <div class="h-60 relative">
+              <canvas id="chart-revenue-expenses"></canvas>
+            </div>
+          </div>
+
+          <!-- Performance Summary Card -->
+          <div class="bg-brandCard p-6 rounded-3xl border border-brandBorder shadow-sm space-y-4 flex flex-col justify-between print-card">
+            <div>
+              <h3 class="text-base font-bold text-brandText flex items-center gap-2 mb-3">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-brandGreen"></i> Best-Selling Product Share
+              </h3>
+              <div class="p-4 rounded-2xl bg-brandBg/60 border border-brandBorder space-y-2">
+                <div class="text-xs text-brandSecondary font-medium">Top Performer</div>
+                <div id="dash-best-name" class="font-bold text-brandText text-sm">Organic Grocery Pack</div>
+                <div class="text-xs text-brandSecondary pt-1">
+                  Units Sold: <strong id="dash-best-units" class="text-brandText">320</strong> / <span id="dash-total-units">1,150</span> total
+                </div>
+                <div class="w-full bg-black/10 rounded-full h-2 mt-2">
+                  <div id="dash-best-bar" class="bg-brandGreen h-2 rounded-full" style="width: 27.8%"></div>
+                </div>
+                <p id="dash-best-pct" class="text-xs font-semibold text-brandGreen pt-1">27.8% of monthly volume</p>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-brandLime/30 border border-brandLime text-xs text-brandText">
+              <strong class="font-bold text-brandGreen">Marketing Overhead:</strong> Spending <span id="dash-mkt-spend">₹12,000</span> generates <span id="dash-mkt-pct">6.7%</span> overhead ratio against gross revenue.
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Insights & Risk Matrix Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Insights -->
+          <div class="bg-brandCard p-6 rounded-3xl border border-brandBorder shadow-sm space-y-4 print-card">
+            <h3 class="text-base font-bold text-brandText flex items-center gap-2 border-b border-brandBorder pb-3">
+              <i data-lucide="lightbulb" class="w-5 h-5 text-brandGreen"></i> AI Business Insights
+            </h3>
+            <div id="dash-insights-container" class="space-y-3">
+              <!-- Dynamic Insights -->
+            </div>
+          </div>
+
+          <!-- Risks -->
+          <div class="bg-brandCard p-6 rounded-3xl border border-brandBorder shadow-sm space-y-4 print-card">
+            <h3 class="text-base font-bold text-brandText flex items-center gap-2 border-b border-brandBorder pb-3">
+              <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600"></i> Potential Risks
+            </h3>
+            <div id="dash-risks-container" class="space-y-3">
+              <!-- Dynamic Risks -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Opportunities & Recommendations Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Opportunities -->
+          <div class="bg-brandCard p-6 rounded-3xl border border-brandBorder shadow-sm space-y-4 print-card">
+            <h3 class="text-base font-bold text-brandText flex items-center gap-2 border-b border-brandBorder pb-3">
+              <i data-lucide="trending-up" class="w-5 h-5 text-brandGreen"></i> Growth Opportunities
+            </h3>
+            <div id="dash-opps-container" class="space-y-3">
+              <!-- Dynamic Opportunities -->
+            </div>
+          </div>
+
+          <!-- Recommended Actions -->
+          <div class="bg-brandCard p-6 rounded-3xl border border-brandBorder shadow-sm space-y-4 print-card">
+            <h3 class="text-base font-bold text-brandText flex items-center gap-2 border-b border-brandBorder pb-3">
+              <i data-lucide="check-square" class="w-5 h-5 text-brandGreen"></i> Recommended Actions (Action / Why / Priority)
+            </h3>
+            <div id="dash-recs-container" class="space-y-3">
+              <!-- Dynamic Recommendations -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Highlighted AI Decision Summary -->
+        <div class="bg-brandCard p-6 md:p-8 rounded-3xl border-2 border-brandGreen shadow-md space-y-4 print-card">
+          <div class="flex items-center gap-2 text-brandGreen font-extrabold text-lg">
+            <i data-lucide="award" class="w-6 h-6"></i> AI DECISION SUMMARY
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm border-b border-brandBorder pb-4">
+            <div>
+              <span class="text-brandSecondary block font-medium">Most Important Finding:</span>
+              <strong id="summary-finding" class="text-brandText font-bold">Strong revenue cushion with 30.6% profit margin.</strong>
+            </div>
+            <div>
+              <span class="text-brandSecondary block font-medium">Biggest Risk:</span>
+              <strong id="summary-risk" class="text-amber-700 font-bold">Potential stockout on best-selling product.</strong>
+            </div>
+            <div>
+              <span class="text-brandSecondary block font-medium">Biggest Opportunity:</span>
+              <strong id="summary-opp" class="text-brandGreen font-bold">Promote top grocery packs to active customer base.</strong>
+            </div>
+          </div>
+
+          <div>
+            <span class="text-xs text-brandSecondary font-medium uppercase tracking-wider">Recommended Next Action</span>
+            <p id="summary-action" class="text-sm md:text-base font-bold text-brandText mt-1 leading-relaxed">
+              "Your business shows healthy revenue, but current inventory for your top product requires immediate restocking to prevent missing demand."
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 4: SAVED ANALYSES ==================== -->
+    <section id="tab-saved" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-brandCard p-6 rounded-3xl border border-brandBorder shadow-sm">
+        <div>
+          <h2 class="text-2xl font-bold text-brandText">Saved Business Reports</h2>
+          <p class="text-sm text-brandSecondary">View previously generated business diagnostics stored locally on your device.</p>
+        </div>
+        <button onclick="clearAllSavedReports()" class="px-4 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-semibold text-xs transition-colors border border-red-200 flex items-center gap-1.5">
+          <i data-lucide="trash-2" class="w-4 h-4"></i> Clear History
+        </button>
+      </div>
+
+      <div id="saved-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamic Saved Cards -->
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: ABOUT / HOW IT WORKS ==================== -->
+    <section id="tab-about" class="tab-content hidden space-y-8 max-w-4xl mx-auto">
+      <div class="bg-brandCard p-8 md:p-10 rounded-3xl border border-brandBorder shadow-sm space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold text-brandText">Project Overview & Architecture</h2>
+          <p class="text-sm text-brandSecondary mt-1">How the AI Decision Intelligence Agent interprets small business data.</p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-base font-bold text-brandGreen">Problem Statement</h3>
+          <p class="text-sm text-brandSecondary leading-relaxed">
+            Small businesses often make crucial operational decisions regarding pricing, inventory, and marketing based on intuition rather than structured analytics. Without access to data analysts, owners risk missing growth levers or facing unexpected inventory stockouts.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-base font-bold text-brandGreen">Agent Pipeline Workflow</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-brandText">
+            <div class="p-3.5 rounded-xl bg-brandBg/60 border border-brandBorder">1. User Inputs Financial & Product Metrics</div>
+            <div class="p-3.5 rounded-xl bg-brandBg/60 border border-brandBorder">2. Agent Calculates Key Indicators (Margin, Profit)</div>
+            <div class="p-3.5 rounded-xl bg-brandBg/60 border border-brandBorder">3. Agent Evaluates Risks & Opportunities</div>
+            <div class="p-3.5 rounded-xl bg-brandBg/60 border border-brandBorder">4. Structured Decision Summary & PDF Output</div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-brandLime/30 border border-brandLime text-xs text-brandText leading-relaxed">
+          <strong class="font-bold text-brandGreen">Note on AI Model:</strong> The application uses AI/LLMs (such as Gemini API when configured) to interpret business information and generate structured decision-support recommendations. If no key is provided, it falls back to an intelligent rule engine.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-brandCard border-t border-brandBorder py-6 mt-12 no-print">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-brandSecondary">
+      <p>AI-Powered Small Business Decision Intelligence Agent</p>
+    </div>
+  </footer>
+
+  <script>
+    // State Variables
+    let currentAnalysis = null;
+    let chartRevenueExpensesInstance = null;
+    const STORAGE_KEY = 'bizintel_agent_saved_reports';
+
+    // DOM Ready Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      updateSavedBadge();
+    });
+
+    // Tab Navigation Switcher
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      
+      const targetTab = document.getElementById(`tab-${tabName}`);
+      if (targetTab) targetTab.classList.remove('hidden');
+
+      const navIds = ['home', 'input', 'dashboard', 'saved', 'about'];
+      navIds.forEach(id => {
+        const btn = document.getElementById(`nav-${id}`);
+        if (btn) {
+          if (id === tabName) {
+            btn.className = "px-3.5 py-2 rounded-xl text-sm font-semibold text-brandGreen bg-brandGreen/10 transition-all";
+          } else {
+            btn.className = "px-3.5 py-2 rounded-xl text-sm font-semibold text-brandSecondary hover:text-brandText hover:bg-black/5 transition-all";
+          }
+        }
+      });
+
+      if (tabName === 'saved') {
+        renderSavedReports();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleMobileMenu() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    }
+
+    // Fill Form with Demo Data Only
+    function fillDemoDataOnly() {
+      document.getElementById('input-name').value = "GreenBasket Local Store";
+      document.getElementById('input-type').value = "Retail";
+      document.getElementById('input-goal').value = "Improve Profit";
+      document.getElementById('input-revenue').value = 180000;
+      document.getElementById('input-expenses').value = 125000;
+      document.getElementById('input-customers').value = 620;
+      document.getElementById('input-sales').value = 1150;
+      document.getElementById('input-best-product').value = "Organic Grocery Pack";
+      document.getElementById('input-best-units').value = 320;
+      document.getElementById('input-inventory').value = "Moderate";
+      document.getElementById('input-marketing').value = 12000;
+      switchTab('input');
+    }
+
+    // Fill Demo Data & Immediately Run Analysis ("Try Demo" Button)
+    async function loadDemoDataAndAnalyze() {
+      fillDemoDataOnly();
+      const mockEvent = { preventDefault: () => {} };
+      await handleFormSubmit(mockEvent);
+    }
+
+    // Workflow Form Handler
+    async function handleFormSubmit(e) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      // Switch to AI Agent Processing Modal
+      switchTab('loading');
+
+      const data = {
+        name: document.getElementById('input-name').value || "GreenBasket Local Store",
+        type: document.getElementById('input-type').value || "Retail",
+        goal: document.getElementById('input-goal').value || "Improve Profit",
+        revenue: parseFloat(document.getElementById('input-revenue').value) || 180000,
+        expenses: parseFloat(document.getElementById('input-expenses').value) || 125000,
+        customers: parseInt(document.getElementById('input-customers').value) || 620,
+        salesUnits: parseInt(document.getElementById('input-sales').value) || 1150,
+        bestProduct: document.getElementById('input-best-product').value || "Organic Grocery Pack",
+        bestUnits: parseInt(document.getElementById('input-best-units').value) || 320,
+        inventory: document.getElementById('input-inventory').value || "Moderate",
+        marketing: parseFloat(document.getElementById('input-marketing').value) || 12000,
+        apiKey: document.getElementById('input-api-key').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      // Animate Step-by-Step Workflow Pipeline
+      await animateWorkflowSteps();
+
+      // Run Decision Agent Algorithm
+      let analysisResult;
+      if (data.apiKey) {
+        analysisResult = await runGeminiAIAgent(data);
+      } else {
+        analysisResult = runRuleBasedAIAgent(data);
+      }
+
+      currentAnalysis = analysisResult;
+
+      // Save Report to Local Storage
+      saveReportToStorage(analysisResult);
+
+      // Render Dashboard
+      renderDashboard(analysisResult);
+
+      switchTab('dashboard');
+    }
+
+    // Step-by-Step AI Agent Loader Animation
+    async function animateWorkflowSteps() {
+      const steps = ['step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'step-6'];
+      for (let i = 0; i < steps.length; i++) {
+        document.getElementById(steps[i]).className = "flex items-center gap-3 text-brandGreen font-semibold";
+        const icon = document.getElementById(steps[i]).querySelector('i');
+        if (icon) icon.setAttribute('data-lucide', 'check-circle-2');
+        lucide.createIcons();
+        await new Promise(r => setTimeout(r, 250));
+      }
+    }
+
+    // Decision Agent Business Logic (Fallback Engine)
+    function runRuleBasedAIAgent(d) {
+      const profit = d.revenue - d.expenses;
+      const profitMargin = d.revenue > 0 ? ((profit / d.revenue) * 100).toFixed(1) : 0;
+      const bestProductShare = d.salesUnits > 0 ? ((d.bestUnits / d.salesUnits) * 100).toFixed(1) : 0;
+      const marketingRatio = d.revenue > 0 ? ((d.marketing / d.revenue) * 100).toFixed(1) : 0;
+
+      // Score Calculation
+      let score = 50;
+      if (profitMargin > 25) score += 25;
+      else if (profitMargin > 10) score += 15;
+      else if (profitMargin < 0) score -= 30;
+
+      if (d.inventory === 'Moderate') score += 15;
+      else if (d.inventory === 'Low') score -= 10;
+      else if (d.inventory === 'Excess / Overstocked') score -= 15;
+
+      if (bestProductShare > 20) score += 10;
+
+      score = Math.max(15, Math.min(100, Math.round(score)));
+
+      let status = "Healthy";
+      if (score < 50) status = "At Risk";
+      else if (score < 70) status = "Moderate";
+
+      // Business Insights
+      const insights = [
+        `Revenue is healthy compared with monthly expenses, delivering a ${profitMargin}% profit margin.`,
+        `Customer activity shows steady demand with ${d.customers} active monthly customers.`,
+        `Your top product (${d.bestProduct}) accounts for ${bestProductShare}% of total unit sales volume.`
+      ];
+
+      // Risks
+      const risks = [];
+      if (d.inventory === 'Low') {
+        risks.push({
+          title: "INVENTORY STOCKOUT RISK",
+          priority: "High",
+          reason: `Current stock level is low while top product represents ${bestProductShare}% of monthly sales volume.`
+        });
+      } else if (d.inventory === 'Excess / Overstocked') {
+        risks.push({
+          title: "CAPITAL TIED IN OVERSTOCK",
+          priority: "High",
+          reason: "Excess inventory is locking up operating cash flow that could be used for marketing."
+        });
+      } else {
+        risks.push({
+          title: "EXPENSE CONSTRICTION RISK",
+          priority: "Medium",
+          reason: `Monthly expenses consume ${(100 - profitMargin).toFixed(1)}% of total earned revenue.`
+        });
+      }
+
+      // Opportunities
+      const opps = [
+        {
+          title: "STRONG PRODUCT DEMAND",
+          explanation: `The best-selling product '${d.bestProduct}' represents ${bestProductShare}% of sales. Consider increasing stock and running targeted promotions.`
+        },
+        {
+          title: "CUSTOMER MONETIZATION",
+          explanation: `With ${d.customers} active customers, introducing bundle deals can raise average order values.`
+        }
+      ];
+
+      // Recommendations
+      const recommendations = [
+        {
+          action: `Maintain Inventory Buffer for ${d.bestProduct}`,
+          why: `This single product drives ${bestProductShare}% of sales volume and avoiding stockouts preserves profit.`,
+          priority: "High"
+        },
+        {
+          action: "Review Operating Expense Ratio",
+          why: `Monthly expenses stand at ₹${d.expenses.toLocaleString()}. Cutting minor overhead boosts net profit margin directly.`,
+          priority: "Medium"
+        },
+        {
+          action: "Optimize Marketing Spend Allocation",
+          why: `Marketing spend is currently ${marketingRatio}% of total revenue. Ensure channels target repeat customers.`,
+          priority: "Low"
+        }
+      ];
+
+      // Decision Summary
+      const summary = {
+        mostImportantFinding: `Business exhibits a strong ${profitMargin}% profit margin with ₹${profit.toLocaleString()} in net profit.`,
+        biggestRisk: d.inventory === 'Low' ? "Potential stockouts on top revenue products." : "Expense growth reducing net operating margins.",
+        biggestOpportunity: `Expanding sales and promotion of best-selling '${d.bestProduct}'.`,
+        nextAction: `Ensure optimal inventory levels for ${d.bestProduct} while maintaining expense controls.`
+      };
+
+      return {
+        id: 'analysis_' + Date.now(),
+        data: d,
+        metrics: { profit, profitMargin, bestProductShare, marketingRatio, score, status },
+        insights,
+        risks,
+        opportunities: opps,
+        recommendations,
+        summary
+      };
+    }
+
+    // Gemini API Engine
+    async function runGeminiAIAgent(d) {
+      try {
+        const prompt = `Analyze this small business data and output strict JSON only:
+          Business: ${d.name} (${d.type}), Goal: ${d.goal}
+          Revenue: ${d.revenue}, Expenses: ${d.expenses}, Customers: ${d.customers}, Sales Units: ${d.salesUnits}
+          Best Selling Product: ${d.bestProduct} (${d.bestUnits} units)
+          Inventory Level: ${d.inventory}, Marketing Spend: ${d.marketing}
+          
+          Return JSON format:
+          {
+            "score": 78,
+            "status": "Healthy",
+            "insights": ["...", "..."],
+            "risks": [{"title": "...", "priority": "High", "reason": "..."}],
+            "opportunities": [{"title": "...", "explanation": "..."}],
+            "recommendations": [{"action": "...", "why": "...", "priority": "High"}],
+            "summary": {"mostImportantFinding": "...", "biggestRisk": "...", "biggestOpportunity": "...", "nextAction": "..."}
+          }`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${d.apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+
+        const resData = await response.json();
+        const text = resData.candidates[0].content.parts[0].text;
+        const cleanedJson = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+        const profit = d.revenue - d.expenses;
+        const profitMargin = d.revenue > 0 ? ((profit / d.revenue) * 100).toFixed(1) : 0;
+        const bestProductShare = d.salesUnits > 0 ? ((d.bestUnits / d.salesUnits) * 100).toFixed(1) : 0;
+        const marketingRatio = d.revenue > 0 ? ((d.marketing / d.revenue) * 100).toFixed(1) : 0;
+
+        return {
+          id: 'analysis_' + Date.now(),
+          data: d,
+          metrics: { profit, profitMargin, bestProductShare, marketingRatio, score: cleanedJson.score || 75, status: cleanedJson.status || "Healthy" },
+          insights: cleanedJson.insights || [],
+          risks: cleanedJson.risks || [],
+          opportunities: cleanedJson.opportunities || [],
+          recommendations: cleanedJson.recommendations || [],
+          summary: cleanedJson.summary || {}
+        };
+      } catch (err) {
+        console.warn("API Call Failed, falling back to rule engine", err);
+        return runRuleBasedAIAgent(d);
+      }
+    }
+
+    // Render Dashboard Data & Chart.js
+    function renderDashboard(report) {
+      const d = report.data;
+      const m = report.metrics;
+
+      // Header Elements
+      document.getElementById('dash-business-name').innerText = d.name;
+      document.getElementById('dash-business-type-badge').innerText = d.type;
+      document.getElementById('dash-goal-badge').innerText = `Goal: ${d.goal}`;
+      document.getElementById('dash-goal-text').innerText = d.goal;
+
+      // Health Score
+      document.getElementById('dash-health-score').innerText = `${m.score} / 100`;
+      const statusBadge = document.getElementById('dash-health-status');
+      statusBadge.innerText = m.status;
+
+      if (m.status === 'Healthy') {
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200";
+      } else if (m.status === 'Moderate') {
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-200";
+      } else {
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200";
+      }
+
+      // Metrics Grid
+      document.getElementById('dash-revenue').innerText = `₹${d.revenue.toLocaleString()}`;
+      document.getElementById('dash-expenses').innerText = `₹${d.expenses.toLocaleString()}`;
+      document.getElementById('dash-profit').innerText = `₹${m.profit.toLocaleString()}`;
+      document.getElementById('dash-margin').innerText = `${m.profitMargin}%`;
+      document.getElementById('dash-customers').innerText = d.customers.toLocaleString();
+      document.getElementById('dash-inventory').innerText = d.inventory;
+
+      // Product Performance Share
+      document.getElementById('dash-best-name').innerText = d.bestProduct;
+      document.getElementById('dash-best-units').innerText = d.bestUnits.toLocaleString();
+      document.getElementById('dash-total-units').innerText = `${d.salesUnits.toLocaleString()} total`;
+      document.getElementById('dash-best-bar').style.width = `${Math.min(100, m.bestProductShare)}%`;
+      document.getElementById('dash-best-pct').innerText = `${m.bestProductShare}% of monthly volume`;
+
+      document.getElementById('dash-mkt-spend').innerText = `₹${d.marketing.toLocaleString()}`;
+      document.getElementById('dash-mkt-pct').innerText = `${m.marketingRatio}%`;
+
+      // Dynamic Insights
+      document.getElementById('dash-insights-container').innerHTML = report.insights.map(ins => `
+        <div class="p-3.5 rounded-2xl bg-brandBg/60 border border-brandBorder text-xs sm:text-sm text-brandText flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-brandGreen shrink-0 mt-0.5"></i>
+          <span>${ins}</span>
+        </div>
+      `).join('');
+
+      // Dynamic Risks
+      document.getElementById('dash-risks-container').innerHTML = report.risks.map(r => `
+        <div class="p-4 rounded-2xl bg-brandBg/60 border border-brandBorder space-y-1.5">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-xs sm:text-sm text-brandText">${r.title}</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${r.priority === 'High' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">
+              Priority: ${r.priority}
+            </span>
+          </div>
+          <p class="text-xs text-brandSecondary"><strong class="text-brandText">Reason:</strong> ${r.reason}</p>
+        </div>
+      `).join('');
+
+      // Dynamic Opportunities
+      document.getElementById('dash-opps-container').innerHTML = report.opportunities.map(o => `
+        <div class="p-4 rounded-2xl bg-brandBg/60 border border-brandBorder space-y-1.5">
+          <h4 class="font-bold text-xs sm:text-sm text-brandGreen">${o.title}</h4>
+          <p class="text-xs text-brandSecondary">${o.explanation}</p>
+        </div>
+      `).join('');
+
+      // Dynamic Recommendations
+      document.getElementById('dash-recs-container').innerHTML = report.recommendations.map(rec => `
+        <div class="p-4 rounded-2xl bg-brandBg/60 border border-brandBorder space-y-1.5">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-xs sm:text-sm text-brandText">${rec.action}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brandLime text-brandText">
+              Priority: ${rec.priority}
+            </span>
+          </div>
+          <p class="text-xs text-brandSecondary"><strong class="text-brandText">Why:</strong> ${rec.why}</p>
+        </div>
+      `).join('');
+
+      // Decision Summary
+      document.getElementById('summary-finding').innerText = report.summary.mostImportantFinding || "";
+      document.getElementById('summary-risk').innerText = report.summary.biggestRisk || "";
+      document.getElementById('summary-opp').innerText = report.summary.biggestOpportunity || "";
+      document.getElementById('summary-action').innerText = `"${report.summary.nextAction || ""}"`;
+
+      lucide.createIcons();
+
+      // Financial Bar Chart
+      const ctx = document.getElementById('chart-revenue-expenses').getContext('2d');
+      if (chartRevenueExpensesInstance) chartRevenueExpensesInstance.destroy();
+      chartRevenueExpensesInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Monthly Revenue', 'Monthly Expenses', 'Net Profit Margin'],
+          datasets: [{
+            data: [d.revenue, d.expenses, m.profit],
+            backgroundColor: ['#287F68', '#E56B6B', m.profit >= 0 ? '#DDF46B' : '#DC2626'],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // Local Storage Reports Management
+    function getSavedReports() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveReportToStorage(report) {
+      const list = getSavedReports();
+      list.unshift(report);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      updateSavedBadge();
+    }
+
+    function deleteSavedReport(id) {
+      let list = getSavedReports();
+      list = list.filter(r => r.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      renderSavedReports();
+      updateSavedBadge();
+    }
+
+    function clearAllSavedReports() {
+      if (confirm("Are you sure you want to delete all saved business reports?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderSavedReports();
+        updateSavedBadge();
+      }
+    }
+
+    function updateSavedBadge() {
+      const list = getSavedReports();
+      const badge = document.getElementById('saved-badge');
+      if (list.length > 0) {
+        badge.innerText = list.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function renderSavedReports() {
+      const container = document.getElementById('saved-list-container');
+      const list = getSavedReports();
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-12 bg-brandCard rounded-3xl border border-brandBorder space-y-3">
+            <i data-lucide="bookmark-x" class="w-10 h-10 text-brandSecondary mx-auto"></i>
+            <h3 class="text-base font-bold text-brandText">No Saved Analyses</h3>
+            <p class="text-xs text-brandSecondary">All generated reports will be stored locally for future reference.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = list.map(item => `
+        <div class="bg-brandCard p-6 rounded-3xl border border-brandBorder shadow-sm space-y-4 flex flex-col justify-between">
+          <div class="space-y-1">
+            <div class="flex justify-between items-start">
+              <h3 class="font-bold text-base text-brandText">${item.data.name}</h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brandGreen/10 text-brandGreen">
+                Score: ${item.metrics.score}
+              </span>
+            </div>
+            <p class="text-xs text-brandSecondary">${item.data.type} • ${new Date(item.data.timestamp).toLocaleDateString()}</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs py-2 border-y border-brandBorder">
+            <div><span class="text-brandSecondary">Revenue:</span> <strong>₹${item.data.revenue.toLocaleString()}</strong></div>
+            <div><span class="text-brandSecondary">Margin:</span> <strong>${item.metrics.profitMargin}%</strong></div>
+          </div>
+
+          <div class="flex gap-2 pt-1">
+            <button onclick="loadSavedReport('${item.id}')" class="flex-1 py-2 rounded-xl bg-brandGreen text-white font-bold text-xs text-center">
+              View Report
+            </button>
+            <button onclick="deleteSavedReport('${item.id}')" class="p-2 rounded-xl border border-brandBorder hover:bg-red-50 hover:text-red-600 transition-colors">
+              <i data-lucide="trash" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function loadSavedReport(id) {
+      const list = getSavedReports();
+      const report = list.find(r => r.id === id);
+      if (report) {
+        currentAnalysis = report;
+        renderDashboard(report);
+        switchTab('dashboard');
+      }
+    }
+
+    function exportReportToPDF() {
+      const btn = document.getElementById('btn-export-pdf');
+      const element = document.getElementById('pdf-content-area');
+
+      // Visual feedback on export button
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Generating PDF...`;
+      lucide.createIcons();
+
+      const businessName = currentAnalysis ? currentAnalysis.data.name.replace(/\s+/g, '_') : 'Business';
+      const opt = {
+        margin:       [10, 10, 10, 10],
+        filename:     `${businessName}_Decision_Report.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      // Run html2pdf to download file directly
+      if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(element).save().then(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }).catch(err => {
+          console.warn("html2pdf failed, falling back to window print", err);
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+          window.print();
+        });
+      } else {
+        btn.innerHTML = originalText;
+        lucide.createIcons();
+        window.print();
+      }
+    }
+  </script>
+</body>
+</html>
